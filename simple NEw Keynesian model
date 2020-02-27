@@ -1,0 +1,49 @@
+var y pi r z a es,us ; %y is output, pi is inflation rate,r is real interest rate,z is marginal cost,es is shock in monetary policy,us is supply shock
+varexo s,u,e;
+parameters rho_a, rho_e, rho_u,beta,eta,theta,chai,rho,phi_r,phi_pi,phi_z,sigma1,sigma2,sigma3;
+rho_a= 0.5;
+rho_e= 0;
+rho_u=0;
+beta=0.99;
+eta=1.5;
+theta=0.75;
+chai=1.1;
+rho=1;
+phi_r=0.8;
+phi_pi=2;
+phi_z=0.5;
+sigma1=0.01;
+sigma2=0.00029;
+sigma3=0.01;
+
+model;
+y=y(+1)-1/rho*(r-pi(+1));
+y=1/(eta+rho-1)*z-eta/(eta+rho-1)*a;
+pi=beta*pi(+1)+(1-theta)*(1-beta*theta)/theta*z+us;
+r=phi_r*r(-1)+(1-phi_r)*((1+phi_pi)*pi+phi_z*z)+es;
+a=rho_a*a(-1)+s;
+us=rho_u*us(-1)+u;
+es=rho_e*es(-1)+e;
+end;
+
+initval; 
+y=0;
+pi=0;
+r=0.01;
+z=0;
+a=0;
+es=0;
+us=0;
+end;
+steady;
+
+shocks;
+var e;
+stderr 100*sigma2;
+var s;
+stderr sigma1;
+var u;
+stderr sigma3;
+end;
+
+stoch_simul(periods=1000,order=1,irf=20) y pi r z;
